@@ -40,7 +40,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         ffaudio.cpp
         ffvideo.cpp
         fftext.cpp
-        ffextractor.cpp)
+        ffextractor.cpp\n        openjoc_jni.cpp)
 
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
 
