@@ -35,7 +35,7 @@ final class OpenJocNative {
   }
 
   static int sendChunk(long decoder, ByteBuffer input, int length, boolean discontinuity) {
-    return nativeSendChunk(decoder, input, length, discontinuity);
+    ByteBuffer chunk = input.slice();\n    return nativeSendChunk(decoder, chunk, Math.min(length, chunk.remaining()), discontinuity);
   }
 
   /**
@@ -43,7 +43,7 @@ final class OpenJocNative {
    * The C API frame pointer is borrowed, so native code copies it before returning.
    */
   static int receiveFrame(long decoder, ByteBuffer output, int[] info) {
-    return nativeReceiveFrame(decoder, output, info);
+    return nativeReceiveFrame(decoder, output.slice(), info);
   }
 
   static int drain(long decoder) {
