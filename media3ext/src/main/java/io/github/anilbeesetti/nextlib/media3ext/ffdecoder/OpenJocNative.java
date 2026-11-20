@@ -15,6 +15,11 @@ final class OpenJocNative {
   static final int STATUS_END_OF_STREAM = 3;
   static final int STATUS_NOT_JOC = 11;
 
+  static final int CLASSIFICATION_UNKNOWN = 0;
+  static final int CLASSIFICATION_CONFIRMED_JOC = 1;
+  static final int CLASSIFICATION_CONFIRMED_NON_JOC = 2;
+  static final int CLASSIFICATION_INVALID_OR_UNSUPPORTED = 3;
+
   static {
     System.loadLibrary("media3ext");
     try {
