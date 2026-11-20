@@ -1,12 +1,18 @@
 name: OpenJOC Android native build
 
+concurrency:
+  group: openjoc-native-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   pull_request:
     paths:
       - ".github/workflows/openjoc-android-native.yml"
       - "docs/openjoc-integration.md"
-      - "media3ext/src/main/cpp/**"
+      - "media3ext/src/main/cpp/CMakeLists.txt"
+      - "media3ext/src/main/cpp/openjoc_jni.cpp"
+      - "media3ext/src/main/cpp/openjoc/include/openjoc.h"
       - "media3ext/src/main/java/io/github/anilbeesetti/nextlib/media3ext/ffdecoder/OpenJocNative.java"
 
 permissions:
