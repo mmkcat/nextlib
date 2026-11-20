@@ -60,10 +60,15 @@ jobs:
             -o "$GITHUB_WORKSPACE/openjoc-android-libs" \
             build --locked --release -p openjoc-capi
 
-      - name: Upload native libraries for integration testing
+      - name: Stage Android jniLibs
+        run: |
+          mkdir -p media3ext/src/main/jniLibs
+          cp -R openjoc-android-libs/* media3ext/src/main/jniLibs/
+
+      - name: Upload Android jniLibs for NextLib integration
         uses: actions/upload-artifact@v4
         with:
-          name: openjoc-android-native
-          path: openjoc-android-libs/
+          name: openjoc-android-jniLibs
+          path: media3ext/src/main/jniLibs/
           if-no-files-found: error
           retention-days: 14
