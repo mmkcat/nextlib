@@ -35,7 +35,8 @@ final class OpenJocNative {
   }
 
   static int sendChunk(long decoder, ByteBuffer input, int length, boolean discontinuity) {
-    ByteBuffer chunk = input.slice();\n    return nativeSendChunk(decoder, chunk, Math.min(length, chunk.remaining()), discontinuity);
+    ByteBuffer chunk = input.slice();
+    return nativeSendChunk(decoder, chunk, Math.min(length, chunk.remaining()), discontinuity);
   }
 
   /**
