@@ -28,7 +28,12 @@ struct OpenJocApi {
 
     bool load() {
         std::lock_guard<std::mutex> guard(mutex);
-        if (library) return create && send_chunk && receive_frame && drain && flush && destroy;
+        if (library) {
+            return config_init && create && send_chunk && receive_frame && drain &&
+                   flush && destroy && frame_init && classifier_create &&
+                   classifier_send_chunk && classifier_finish && classifier_reset &&
+                   classifier_destroy;
+        }
         library = dlopen("libopenjoc_capi.so", RTLD_NOW | RTLD_LOCAL);
         if (!library) return false;
 #define LOAD(member, symbol) member = reinterpret_cast<decltype(member)>(dlsym(library, symbol))
