@@ -1,0 +1,92 @@
+name: OpenJOC Android native build
+
+concurrency:
+  group: openjoc-native-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/openjoc-integration
+    paths:
+      - ".github/workflows/openjoc-android-native.yml"
+      - "docs/openjoc-integration.md"
+      - "media3ext/src/main/cpp/CMakeLists.txt"
+      - "media3ext/src/main/cpp/openjoc_jni.cpp"
+      - "media3ext/src/main/cpp/openjoc/include/openjoc.h"
+      - "media3ext/src/main/java/io/github/anilbeesetti/nextlib/media3ext/ffdecoder/OpenJocNative.java"
+  pull_request:
+    paths:
+      - ".github/workflows/openjoc-android-native.yml"
+      - "docs/openjoc-integration.md"
+      - "media3ext/src/main/cpp/CMakeLists.txt"
+      - "media3ext/src/main/cpp/openjoc_jni.cpp"
+      - "media3ext/src/main/cpp/openjoc/include/openjoc.h"
+      - "media3ext/src/main/java/io/github/anilbeesetti/nextlib/media3ext/ffdecoder/OpenJocNative.java"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out NextLib
+        uses: actions/checkout@v4
+
+      - name: Install Android SDK and NDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install pinned Android NDK
+        run: sdkmanager "ndk;25.2.9519653"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.89.0
+          targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Check out pinned OpenJOC source
+        run: |
+          git clone https://github.com/chyinan/OpenJOC.git "$RUNNER_TEMP/OpenJOC"
+          git -C "$RUNNER_TEMP/OpenJOC" checkout 4f740b25bb65a7d63b85d72a5c80477b70472ec4
+          test "$(git -C "$RUNNER_TEMP/OpenJOC" rev-parse HEAD)" = 4f740b25bb65a7d63b85d72a5c80477b70472ec4
+
+      - name: Run OpenJOC C ABI host tests
+        working-directory: ${{ runner.temp }}/OpenJOC
+        run: cargo test --locked -p openjoc-capi
+
+      - name: Build OpenJOC C ABI for all NextLib Android ABIs
+        working-directory: ${{ runner.temp }}/OpenJOC
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/openjoc-android-libs"
+          cargo ndk \
+            -t armeabi-v7a \
+            -t arm64-v8a \
+            -t x86 \
+            -t x86_64 \
+            -o "$GITHUB_WORKSPACE/openjoc-android-libs" \
+            build --locked --release -p openjoc-capi
+
+      - name: Stage Android jniLibs
+        run: |
+          mkdir -p media3ext/src/main/jniLibs
+          cp -R openjoc-android-libs/* media3ext/src/main/jniLibs/
+
+      - name: Upload Android jniLibs for NextLib integration
+        uses: actions/upload-artifact@v4
+        with:
+          name: openjoc-android-jniLibs
+          path: media3ext/src/main/jniLibs/
+          if-no-files-found: error
+          retention-days: 14
