@@ -132,3 +132,62 @@ Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeDest
         api.destroy(reinterpret_cast<openjoc_stream_decoder *>(handle));
     }
 }
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeCreateClassifier(
+        JNIEnv *, jclass) {
+    if (!api.load()) return 0;
+    openjoc_classifier *classifier = nullptr;
+    const openjoc_status status = openjoc_classifier_create(&classifier);
+    if (status != OPENJOC_STATUS_OK || !classifier) {
+        JOC_LOGE("OpenJOC classifier creation failed: %d", status);
+        return 0;
+    }
+    return reinterpret_cast<jlong>(classifier);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeClassifyChunk(
+        JNIEnv *env, jclass, jlong handle, jobject input, jint length, jintArray classification) {
+    if (!api.load() || handle == 0 || input == nullptr || classification == nullptr ||
+        env->GetArrayLength(classification) < 1 || length < 0) {
+        return OPENJOC_STATUS_INVALID_ARGUMENT;
+    }
+    auto *data = static_cast<const uint8_t *>(env->GetDirectBufferAddress(input));
+    const jlong capacity = env->GetDirectBufferCapacity(input);
+    if (!data || capacity < length) return OPENJOC_STATUS_INVALID_ARGUMENT;
+    openjoc_classification result = OPENJOC_CLASSIFICATION_UNKNOWN;
+    const openjoc_status status = openjoc_classifier_send_chunk(
+        reinterpret_cast<openjoc_classifier *>(handle), data, static_cast<size_t>(length), &result);
+    jint value = static_cast<jint>(result);
+    env->SetIntArrayRegion(classification, 0, 1, &value);
+    return status;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeFinishClassification(
+        JNIEnv *env, jclass, jlong handle, jintArray classification) {
+    if (!api.load() || handle == 0 || classification == nullptr ||
+        env->GetArrayLength(classification) < 1) return OPENJOC_STATUS_INVALID_ARGUMENT;
+    openjoc_classification result = OPENJOC_CLASSIFICATION_UNKNOWN;
+    const openjoc_status status = openjoc_classifier_finish(
+        reinterpret_cast<openjoc_classifier *>(handle), &result);
+    jint value = static_cast<jint>(result);
+    env->SetIntArrayRegion(classification, 0, 1, &value);
+    return status;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeResetClassifier(
+        JNIEnv *, jclass, jlong handle) {
+    if (!api.load() || handle == 0) return OPENJOC_STATUS_INVALID_ARGUMENT;
+    return openjoc_classifier_reset(reinterpret_cast<openjoc_classifier *>(handle));
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeDestroyClassifier(
+        JNIEnv *, jclass, jlong handle) {
+    if (api.load() && handle != 0) {
+        openjoc_classifier_destroy(reinterpret_cast<openjoc_classifier *>(handle));
+    }
+}
