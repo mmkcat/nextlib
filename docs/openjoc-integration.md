@@ -30,9 +30,9 @@ The adapter targets the versioned C ABI in OpenJOC crates/openjoc-capi/include/o
 
 ## Native packaging gate
 
-The C API crate builds as rlib, staticlib and cdylib, and its default openjoc-ffmpeg dependency does not enable the optional external-FFmpeg feature. Android packaging still needs an explicit, reproducible Rust cross-build for every supported ABI (currently x86, x86_64, armeabi-v7a and arm64-v8a), plus a defined way to package/load the resulting library. This must be verified with the project's NDK and OpenJOC's Rust MSRV before enabling the renderer by default.
+The C API crate builds as rlib, staticlib and cdylib, and its default openjoc-ffmpeg dependency does not enable the optional external-FFmpeg feature. The native workflow now stages the four ABI libraries in Android jniLibs layout and uploads them as the openjoc-android-jniLibs artifact. The consuming app must package that artifact under media3ext/src/main/jniLibs before OpenJocNative.isAvailable() can return true. The JNI bridge itself is compiled as part of media3ext; packaging and device loading still need verification.
 
-Do not add a fake JNI implementation or an always-visible settings switch before the native artifact, ABI loading, and playback fallback have been tested.
+An initial low-level JNI bridge now exists in OpenJocNative.java and openjoc_jni.cpp. It exposes stream create/send/receive/drain/flush/destroy operations and copies borrowed PCM frame data into a caller-owned direct buffer. It dynamically resolves the C ABI so builds without the optional native artifact remain loadable. This is not yet a Media3 Decoder/Renderer and does not implement automatic non-JOC fallback.
 
 ## Spatial settings status
 
