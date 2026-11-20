@@ -2,7 +2,7 @@ name: OpenJOC Android native build
 
 concurrency:
   group: openjoc-native-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
