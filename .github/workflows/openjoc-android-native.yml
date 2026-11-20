@@ -30,6 +30,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.89.0
+          targets: armv7-linux-androideabi,aarch64-linux-android,i686-linux-android,x86_64-linux-android
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
@@ -48,6 +49,7 @@ jobs:
         working-directory: ${{ runner.temp }}/OpenJOC
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
+          ANDROID_NDK_ROOT: ${{ env.ANDROID_HOME }}/ndk/25.2.9519653
         run: |
           mkdir -p "$GITHUB_WORKSPACE/openjoc-android-libs"
           cargo ndk \
