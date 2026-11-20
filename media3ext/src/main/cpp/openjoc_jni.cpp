@@ -10,6 +10,7 @@
 
 namespace {
 struct OpenJocApi {
+    std::mutex mutex;
     void *library = nullptr;
     decltype(&openjoc_decoder_config_init_v1_7) config_init = nullptr;
     decltype(&openjoc_stream_decoder_create) create = nullptr;
@@ -21,6 +22,7 @@ struct OpenJocApi {
     decltype(&openjoc_pcm_frame_init) frame_init = nullptr;
 
     bool load() {
+        std::lock_guard<std::mutex> guard(mutex);
         if (library) return create && send_chunk && receive_frame && drain && flush && destroy;
         library = dlopen("libopenjoc_capi.so", RTLD_NOW | RTLD_LOCAL);
         if (!library) return false;
