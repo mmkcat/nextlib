@@ -50,4 +50,4 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         android
         jnigraphics
         z
-        ${ffmpeg_libs_names})
+        ${ffmpeg_libs_names}\n        dl)
