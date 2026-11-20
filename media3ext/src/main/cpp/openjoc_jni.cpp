@@ -2,7 +2,8 @@
 #include <android/log.h>
 #include <dlfcn.h>
 #include <cstring>
-#include <cstdint>\n#include <mutex>
+#include <cstdint>
+#include <mutex>
 #include "openjoc/include/openjoc.h"
 
 #define JOC_LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "OpenJocNative", __VA_ARGS__)
@@ -93,7 +94,10 @@ Java_io_github_anilbeesetti_nextlib_media3ext_ffdecoder_OpenJocNative_nativeRece
     const openjoc_status status =
         api.receive_frame(reinterpret_cast<openjoc_stream_decoder *>(handle), &frame);
     if (status != OPENJOC_STATUS_FRAME_AVAILABLE) return status;
-    if (frame.data == nullptr || frame.data_len % sizeof(float) != 0) {\n        return OPENJOC_STATUS_DECODE_ERROR;\n    }\n    if (frame.data_len > static_cast<size_t>(capacity)) return OPENJOC_STATUS_OUT_OF_MEMORY;
+    if (frame.data == nullptr || frame.data_len % sizeof(float) != 0) {
+        return OPENJOC_STATUS_DECODE_ERROR;
+    }
+    if (frame.data_len > static_cast<size_t>(capacity)) return OPENJOC_STATUS_OUT_OF_MEMORY;
 
     std::memcpy(destination, frame.data, frame.data_len);
     jint values[3] = {
