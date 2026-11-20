@@ -5,7 +5,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/openjoc-android-native.yml"
-      - "docs/openjoc-integration.md"
+      - "docs/openjoc-integration.md"\n      - "media3ext/src/main/cpp/**"\n      - "media3ext/src/main/java/io/github/anilbeesetti/nextlib/media3ext/ffdecoder/OpenJocNative.java"
 
 permissions:
   contents: read
