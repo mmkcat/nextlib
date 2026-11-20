@@ -70,4 +70,10 @@ final class OpenJocNative {
   private static native int nativeDrain(long decoder);
   private static native int nativeFlush(long decoder);
   private static native void nativeDestroy(long decoder);
+  private static native long nativeCreateClassifier();
+  private static native int nativeClassifyChunk(
+      long classifier, ByteBuffer input, int length, int[] classification);
+  private static native int nativeFinishClassification(long classifier, int[] classification);
+  private static native int nativeResetClassifier(long classifier);
+  private static native void nativeDestroyClassifier(long classifier);
 }
