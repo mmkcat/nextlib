@@ -62,6 +62,28 @@ final class OpenJocNative {
     nativeDestroy(decoder);
   }
 
+  static long createClassifier() {
+    return nativeCreateClassifier();
+  }
+
+  static int classifyChunk(long classifier, ByteBuffer input, int length, int[] classification) {
+    ByteBuffer chunk = input.slice();
+    if (length < 0 || length > chunk.remaining()) return 6;
+    return nativeClassifyChunk(classifier, chunk, length, classification);
+  }
+
+  static int finishClassification(long classifier, int[] classification) {
+    return nativeFinishClassification(classifier, classification);
+  }
+
+  static int resetClassifier(long classifier) {
+    return nativeResetClassifier(classifier);
+  }
+
+  static void destroyClassifier(long classifier) {
+    nativeDestroyClassifier(classifier);
+  }
+
   private static native boolean nativeIsAvailable();
   private static native long nativeCreate(int renderMode);
   private static native int nativeSendChunk(
